@@ -1,0 +1,178 @@
+\documentclass{article}
+
+\usepackage{amsmath}
+\usepackage{fullpage}
+\usepackage{url}
+\usepackage{xspace}
+
+
+\title{Examples of how to use functions}
+\author{Kwame Okrah, Hector Bravo}
+\date{\today}
+
+\begin{document}
+\SweaveOpts{concordance=TRUE}
+\maketitle
+
+\section{Overview of pipeline}
+The purpose of this pipeline is to streamline the process for analyzing RNA-seq data
+with potential batch effects. The pipeline includes 1) quantile normalization 2) log-transformation of counts 3) combat (location) batch correction 4) voom calculation of weights.\\\\
+The functions in this package can be grouped into two main categories:
+
+\begin{enumerate}
+\item The functions used for assessing batch effects.
+    \begin{itemize}
+    \item makeSVD
+    \item pcRes
+    \item plotPC
+    \end{itemize}
+\item The functions for removing batch effect and computing weights for limma.
+    \begin{itemize}
+    \item qNorm
+    \item log2CPM
+    \item voomMod
+    \item combatMod
+    \item batchSEQ$^*$
+    \end{itemize}
+\end{enumerate}
+$^*$ batchSEQ is the pipeline function. It combines qNorm, log2CPM, voomMod, and combatMod
+into one step.\\\\
+Below we will illustrte how to use these functions using the pasilla data set.\\\\
+{\bf note}: All the functions in this package have a detailed help file which tells you
+what kind of objects go in and what kind of objects come out. It is important to look
+at these help files for each function.
+
+\section{Examples of how to use the functions}
+We will use the pasilla dataset found in the pasilla package. (This is the same dataset used
+in the DESeq vignette)
+<<>>=
+require(pasilla)
+# locate the path of the dataset and read in the dataset
+datafile = system.file("extdata/pasilla_gene_counts.tsv", package="pasilla")
+counts = read.table(datafile, header=TRUE, row.names=1)
+head(counts)
+dim(counts)
+counts = counts[rowSums(counts) > ncol(counts),]
+dim(counts)
+@
+In this dataset there are two biological conditions: treated (3 samples) and untreated (4 samples). 
+Two samples are single-end and the other 4 are paired-end. We will use sigle-end and paired-end
+as bathch effects. Below is the design (pheno data.frame).
+<<>>=
+design = data.frame(row.names=colnames(counts), 
+                    condition=c("untreated","untreated","untreated",
+                                "untreated","treated","treated","treated"),
+                    libType=c("single-end","single-end","paired-end",
+                              "paired-end","single-end","paired-end","paired-end"))
+design
+@
+\subsection{Explore data for batch effects}
+We will begin our analysis by exploring the data for possible/significant batch effects.
+
+<<>>=
+# load batch package
+require(cbcbSEQ)
+#
+# quantile normalize: adjust counts for library size.
+qcounts = qNorm(counts)
+# convert counts to log2 counts per milliom. (voom scale)
+cpm = log2CPM(qcounts)
+names(cpm)
+libsize = cpm$lib.size
+cpm = cpm$y
+#
+# PCA analysis
+# returns a list with two components v and d.
+res = makeSVD(cpm)
+@
+We can now call pcRes and plotPC.
+\begin{itemize}
+\item pcRes: computes variance of each principal component and how they "correlate" with batch and condition.\\\\
+<<>>=
+pcRes(res$v,res$d, design$condition, design$libType)
+@
+\item plotPC: Plot first 2 principal components. This function works like the regular plot function in R. ie. We can add all the options to make the plot sensible and well labelled. Below is an 
+example:
+<<fig=TRUE>>=
+plotPC(res$v,res$d, 
+       col=design$condition, # color by batch
+       pch=19, main="PCA plot",
+       xlim=c(min(res$v[,1])-.08,max(res$v[,1])+.08),
+	     ylim=c(min(res$v[,2])-.08,max(res$v[,2])+.08))
+text(res$v[,1], res$v[,2], design$libType, pos=1, cex=0.6) 
+@
+\end{itemize}
+
+We see that there is a batch effect in the data. Both in the PCA "correlation" table
+and the PCA plot.
+\subsection{Correct data for batch effects}
+The standard way to correct for batch effects will be to account for batch in the linear
+model. However we will use a modified version of combat instead. 
+In this only adjust batch location. We do not adjust for scalar batch effects.
+This is because the data is not necessarily Gaussian. In order to account for scaling
+we have to take into account the mean var relationship inherent in this kind of data.
+We adjust batch location by removing the empirical beysian estimates of batch effects.
+(Future work)
+
+<<>>=
+# combatMod function
+# noScale=TRUE option not to scale adjust
+tmp = combatMod(cpm, batch=design$libType, mod=design$condition, noScale=TRUE)
+names(tmp)
+tmp = tmp$bayesdata
+# look at PCA results again
+res = makeSVD(tmp)
+# batch effect is reduced
+pcRes(res$v,res$d, design$condition, design$libType)
+@
+<<fig=TRUE>>=
+plotPC(res$v,res$d, 
+       col=design$condition, # color by batch
+       pch=19, main="PCA plot",
+       xlim=c(min(res$v[,1])-.08,max(res$v[,1])+.08),
+       ylim=c(min(res$v[,2])-.08,max(res$v[,2])+.08))
+text(res$v[,1], res$v[,2], design$libType, pos=1, cex=0.6) 
+@
+We are now ready to use limma. However we must compute the weights. We modify so
+it does not assume that the data are counts.
+<<fig=TRUE>>=
+v = voomMod(tmp, model.matrix(~design$condition), lib.size=libsize, plot=TRUE)
+@
+
+<<>>=
+v
+fit = lmFit(v)
+eb = eBayes(fit)
+top = topTable(eb, coef=2, n=nrow(v$E))
+@
+Plot results
+<<fig=TRUE>>=
+sel = top$adj.P.Val < 0.05
+plot(top$logFC, -log10(top$adj.P.Val), pch=16, cex=0.3,
+     main=paste(sum(sel), "/", length(sel)))
+sel = top$adj.P.Val < 0.05
+points(top$logFC[sel], -log10(top$adj.P.Val)[sel], col="red", cex=0.3)
+abline(v=c(-1,1), h=-log10(0.05), col="blue")
+@
+Let us now compare the results to what we get when we adjust for bath in the model
+
+<<>>=
+cond=design$condition
+batch=design$libType
+mod = model.matrix(~cond+batch ,
+                   contrasts.arg=list(cond="contr.treatment", batch="contr.sum"))
+v1 = voom(counts, mod) 
+fit1 = lmFit(v1)
+eb1 = eBayes(fit1)
+top1 = topTable(eb1, coef=2, n=nrow(v1$E))
+@
+Compare results results:
+<<>>=
+tab = merge(top[,c("ID", "adj.P.Val")], top1[,c("ID", "adj.P.Val")], by="ID")
+as.data.frame(table(combat = tab[,2] < 0.05, model = tab[,3] < 0.05))
+@
+We gain slightly more with combat.
+
+
+
+\end{document}
