@@ -1,20 +1,37 @@
-\documentclass{article}
+%\VignetteIndexEntry{Introduction to antiProfiles}
+%\VignetteDepends{cbcbSEQ}
+%\VignetteDepends{pasilla}
+
+\documentclass[12pt]{article}
+
+<<options,echo=FALSE,eval=FALSE,results=hide>>=
+options(width=70)
+@
+\newcommand{\Rcode}[1]{{\texttt{#1}}}
+\newcommand{\Rpackage}[1]{{\texttt{#1}}}
+\newcommand{\software}[1]{{\texttt{#1}}}
+\newcommand{\R}{\software{R}}
+\newcommand{\bold}[1]{\textbf{#1}} % Fix for R bibentry
 
 \usepackage{amsmath}
 \usepackage{fullpage}
 \usepackage{url}
 \usepackage{xspace}
+\usepackage[numbers]{natbib}
 
 
 \title{Examples of how to use functions}
 \author{Kwame Okrah, Hector Bravo}
-\date{\today}
+\date{Modified: June 7, 2013. Compiled: \today}
 
 \begin{document}
 \SweaveOpts{concordance=TRUE}
 \maketitle
 
-\section{Overview of pipeline}
+\setlength{\parskip}{1\baselineskip}
+\setlength{\parindent}{0pt}
+
+\section{Overview of cbcbSEQ pipeline}
 The purpose of this pipeline is to streamline the process for analyzing RNA-seq data
 with potential batch effects. The pipeline includes 1) quantile normalization 2) log-transformation of counts 3) combat (location) batch correction 4) voom calculation of weights.\\\\
 The functions in this package can be grouped into two main categories:
@@ -57,7 +74,7 @@ dim(counts)
 @
 In this dataset there are two biological conditions: treated (3 samples) and untreated (4 samples). 
 Two samples are single-end and the other 4 are paired-end. We will use sigle-end and paired-end
-as bathch effects. Below is the design (pheno data.frame).
+as batch effects. Below is the experiment design matrix (pheno data.frame).
 <<>>=
 design = data.frame(row.names=colnames(counts), 
                     condition=c("untreated","untreated","untreated",
@@ -67,7 +84,7 @@ design = data.frame(row.names=colnames(counts),
 design
 @
 \subsection{Explore data for batch effects}
-We will begin our analysis by exploring the data for possible/significant batch effects.
+We will begin our analysis by exploring the data for possible/significant batch effects. We implemented here some of the analysis methods outlined in Leek et al.~\cite{leek}.
 
 <<>>=
 # load batch package
@@ -106,13 +123,9 @@ text(res$v[,1], res$v[,2], design$libType, pos=1, cex=0.6)
 We see that there is a batch effect in the data. Both in the PCA "correlation" table
 and the PCA plot.
 \subsection{Correct data for batch effects}
-The standard way to correct for batch effects will be to account for batch in the linear
-model. However we will use a modified version of combat instead. 
-In this only adjust batch location. We do not adjust for scalar batch effects.
-This is because the data is not necessarily Gaussian. In order to account for scaling
-we have to take into account the mean var relationship inherent in this kind of data.
-We adjust batch location by removing the empirical beysian estimates of batch effects.
-(Future work)
+A standard way of accounting for batch effects in data analysis is to include batch indicators as covariates in a linear model (e.g., in Limma with weights computed by voom to model heteroskedasticity through a mean-variance relationship). However, in some cases we may want to obtain robust estimates of batch effects using a hierarchical model like Combat~\cite{combat}. However, we made some modifications to Combat. The most significant is that we do not estimate or adjust for batch scale effect due to heterskedasticity. In order to account for scaling
+we have to take into account the mean var relationship inherent in this kind of data (we're working on it, but it's not done yet).
+We adjust data by removing the empirical bayesian estimates of batch location effects.
 
 <<>>=
 # combatMod function
@@ -133,8 +146,8 @@ plotPC(res$v,res$d,
        ylim=c(min(res$v[,2])-.08,max(res$v[,2])+.08))
 text(res$v[,1], res$v[,2], design$libType, pos=1, cex=0.6) 
 @
-We are now ready to use limma. However we must compute the weights. We modify so
-it does not assume that the data are counts.
+We are now ready to use limma and voom. We also modified the voom function so
+it takes data on log-scale as input. 
 <<fig=TRUE>>=
 v = voomMod(tmp, model.matrix(~design$condition), lib.size=libsize, plot=TRUE)
 @
@@ -145,7 +158,7 @@ fit = lmFit(v)
 eb = eBayes(fit)
 top = topTable(eb, coef=2, n=nrow(v$E))
 @
-Plot results
+Plot results as a volcano plot
 <<fig=TRUE>>=
 sel = top$adj.P.Val < 0.05
 plot(top$logFC, -log10(top$adj.P.Val), pch=16, cex=0.3,
@@ -154,7 +167,7 @@ sel = top$adj.P.Val < 0.05
 points(top$logFC[sel], -log10(top$adj.P.Val)[sel], col="red", cex=0.3)
 abline(v=c(-1,1), h=-log10(0.05), col="blue")
 @
-Let us now compare the results to what we get when we adjust for bath in the model
+Let us now compare the results to what we get when we adjust for batch in the model
 
 <<>>=
 cond=design$condition
@@ -166,13 +179,21 @@ fit1 = lmFit(v1)
 eb1 = eBayes(fit1)
 top1 = topTable(eb1, coef=2, n=nrow(v1$E))
 @
-Compare results results:
+Compare results:
 <<>>=
 tab = merge(top[,c("ID", "adj.P.Val")], top1[,c("ID", "adj.P.Val")], by="ID")
 as.data.frame(table(combat = tab[,2] < 0.05, model = tab[,3] < 0.05))
 @
-We gain slightly more with combat.
+After correction with modified ComBat, there are a few more differentially abundant genes.
 
+\bibliographystyle{plain}
+\bibliography{cbcbSEQIntro}
+
+\section*{SessionIntro}
+
+<<sessionIntro,results=tex,eval=TRUE,echo=FALSE>>=
+toLatex(sessionInfo())
+@
 
 
 \end{document}
