@@ -1,0 +1,8 @@
+export(batchSEQ)
+export(combatMod)
+export(log2CPM)
+export(makeSVD)
+export(pcRes)
+export(plotPC)
+export(qNorm)
+export(voomMod)
