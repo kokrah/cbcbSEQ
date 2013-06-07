@@ -1,9 +1,9 @@
-Package: cbcbSEQ1
+Package: cbcbSEQ
 Maintainer: Kwame Okrah <kwame.okrah@gmail.com>
 Author: Kwame Okrah, Hector Corrada Bravo
 Version: 0.9
 License: Artistic-2.0
-Title: Batch effects (RNA-Seq)
+Title: RNAseq analysis pipeline for UMD CBCB collaborators with batch effect assessment and correction
 Description: Implements a pipleline to check for batch effects and possibly
     remove them.
 Depends:
