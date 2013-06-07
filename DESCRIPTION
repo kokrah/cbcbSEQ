@@ -1,0 +1,19 @@
+Package: cbcbSEQ1
+Maintainer: Kwame Okrah <kwame.okrah@gmail.com>
+Author: Kwame Okrah, Hector Corrada Bravo
+Version: 0.9
+License: Artistic-2.0
+Title: Batch effects (RNA-Seq)
+Description: Implements a pipleline to check for batch effects and possibly
+    remove them.
+Depends:
+    limma,
+    corpcor,
+    preprocessCore,
+    sva,
+Suggests:
+    pasilla,
+Collate:
+    'explore.R'
+    'pipeline.R'
+    'transform.R'
