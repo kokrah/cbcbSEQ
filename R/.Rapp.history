@@ -1,0 +1,5 @@
+library(devtools)#
+has_devel()
+install.packages("devtools", dependencies = TRUE)
+library(devtools)#
+has_devel()
