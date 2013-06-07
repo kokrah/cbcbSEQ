@@ -30,7 +30,7 @@ The functions in this package can be grouped into two main categories:
 ## Installation
 
 To begin, install [Bioconductor](http://www.bioconductor.org/) along with a
-few dependencies that cbcbSEQ uses.
+few dependencies that cbcbSEQ uses:
 
 ```r
 source("http://bioconductor.org/biocLite.R")
@@ -38,13 +38,13 @@ biocLite(c('limma', 'preprocessCore', 'sva'))
 ```
 
 Next, use [devtools](https://github.com/hadley/devtools) to install the latest
-version of cbcbSEQ from Github.
+version of cbcbSEQ from Github:
 ```r
 require(devtools)
 install_github("cbcbSEQ", user="kokrah")
 ```
 
-If all went well you should now be able to load cbcbSEQ.
+If all went well you should now be able to load cbcbSEQ:
 ```r
 require(cbcbSEQ)
 vignette('cbcbSEQIntro', package='cbcbSEQ')
