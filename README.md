@@ -6,16 +6,16 @@ with potential batch effects. The pipeline includes 1) quantile normalization 2)
 
 The functions in this package can be grouped into two main categories:
 
-1. The functions used for assessing batch effects.
-    a. `makeSVD`
-    b. `pcRes`
-    c.  `plotPC`
-2. The functions for removing batch effect and computing weights for limma.
-    a. `qNorm`
-    b. `log2CPM`
-    c.  `voomMod`
-    d.  `combatMod`
-    e.  `batchSEQ`
+1. The functions used for assessing batch effects.  
+    a. `makeSVD`  
+    b. `pcRes`  
+    c.  `plotPC`  
+2. The functions for removing batch effect and computing weights for limma.  
+    a. `qNorm`  
+    b. `log2CPM`  
+    c.  `voomMod`  
+    d.  `combatMod`  
+    e.  `batchSEQ`  
     
 `batchSEQ` is the pipeline function. It combines `qNorm`, `log2CPM`, `voomMod`, and `combatMod`
 into one step.
