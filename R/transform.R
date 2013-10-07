@@ -25,7 +25,7 @@ qNorm <- function(x, verbose=FALSE){
 #' @param lib.size default is colsums(qcounts)
 #' @return list containing log2(quantile counts per mil reads) and library sizes
 #' @export
-log2CPM <- function(qcounts, lib.size=colSums(qcounts)){
+log2CPM <- function(qcounts, lib.size=NULL){
   if (is.null(lib.size)) 
     lib.size <- colSums(qcounts)
   y <- t(log2(t(qcounts + 0.5)/(lib.size + 1) * 1e+06))
