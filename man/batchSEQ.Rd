@@ -3,7 +3,8 @@
 \title{a pipeline for batch correction and mean-variance function calculation for count data}
 \usage{
   batchSEQ(counts, design, batch, condition,
-    lib.size = NULL, verbose = FALSE, plot = FALSE, ...)
+    lib.size = NULL, verbose = FALSE, plot = FALSE,
+    filter = TRUE, ...)
 }
 \arguments{
   \item{counts}{Count matrix}
@@ -21,6 +22,8 @@
   \item{plot}{plot the mean-variance fit}
 
   \item{condition}{factor indicating biological condition}
+
+  \item{filter}{filter genes with low expression}
 
   \item{...}{pass arguments to internal functions}
 }

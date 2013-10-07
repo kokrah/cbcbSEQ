@@ -13,11 +13,17 @@
 #' @param verbose print extra information
 #' @param plot plot the mean-variance fit
 #' @param condition factor indicating biological condition
+#' @param filter filter genes with low expression
 #' @param ... pass arguments to internal functions
 #' @return list with components elist (result of calling voom) and combatEstimates (batch effect estimates from combat)
 #' @export
-batchSEQ <- function(counts, design, batch, condition, lib.size=NULL, verbose=FALSE, plot=FALSE, ...)
+batchSEQ <- function(counts, design, batch, condition, lib.size=NULL, verbose=FALSE, plot=FALSE, filter=FALSE, ...)
 {
+  if (filter) {
+    # filter samples
+    counts <- filterCounts(counts, lib.size, ...)
+  }
+  
   # quantile normalize counts
   qcounts = qNorm(counts, verbose=verbose)
   

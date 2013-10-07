@@ -1,11 +1,11 @@
 \name{voomMod}
 \alias{voomMod}
-\title{Call modified voom on ComBat adjusted data}
+\title{Call modified voom on ComBatLoc adjusted data}
 \usage{
   voomMod(x, design, lib.size, plot = FALSE)
 }
 \arguments{
-  \item{x}{ComBat adjusted data}
+  \item{x}{ComBatLoc adjusted data}
 
   \item{design}{reparameterized design matrix}
 
@@ -19,6 +19,6 @@
   Elist object
 }
 \description{
-  Call modified voom on ComBat adjusted data
+  Call modified voom on ComBatLoc adjusted data
 }
 

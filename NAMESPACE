@@ -1,5 +1,6 @@
 export(batchSEQ)
 export(combatMod)
+export(filterCounts)
 export(log2CPM)
 export(makeSVD)
 export(pcRes)
