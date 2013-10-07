@@ -178,7 +178,7 @@ combatMod <- function(dat, batch, mod, noScale=TRUE, prior.plots = FALSE){
     }
     
     cat("Adjusting data for batch effects\n")
-    return( list(bayesdata=bayesdata, info=hld) ) 
+    return(bayesdata)
     
   }else{
     # Continue with orignal method
@@ -248,8 +248,7 @@ combatMod <- function(dat, batch, mod, noScale=TRUE, prior.plots = FALSE){
     
     bayesdata <- (bayesdata * (sqrt(var.pooled) %*% t(rep(1, n.array)))) + stand.mean
     
-    res <- list(bayesdata=bayesdata, gamma.star=t(gamma.star), delta.star=t(delta.star))
-    return(res)
+    return(bayesdata)
   }  
     
 }

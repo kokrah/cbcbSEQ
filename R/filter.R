@@ -11,7 +11,7 @@ filterCounts <- function(counts, lib.size = NULL,
                          thresh = 1, 
                          minSamples = 2)
 {
-  cpms <- 2^logCPM(counts, lib.size=lib.size)
+  cpms <- 2^log2CPM(counts, lib.size=lib.size)$y
   keep <- rowSums(cpms > thresh) >= minSamples
   counts <- counts[keep,]
   counts

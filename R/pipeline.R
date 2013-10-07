@@ -34,12 +34,9 @@ batchSEQ <- function(counts, design, batch, condition, lib.size=NULL, verbose=FA
   
   # run combat on the log(cpm) data
   res = combatMod(y, batch, condition, ...)
-  
-  y = res$bayesdata
-  res = res[c("gamma.star", "delta.star")]
-  
+   
   # compute weights from voom
-  voomRes = voomMod(y, design, lib.size, plot=plot)
+  voomRes = voomMod(res, design, lib.size, plot=plot)
 
-  return(list(elist=voomRes, combatEstimates=res))
+  return(voomRes)
 }

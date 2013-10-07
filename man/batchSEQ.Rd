@@ -4,7 +4,7 @@
 \usage{
   batchSEQ(counts, design, batch, condition,
     lib.size = NULL, verbose = FALSE, plot = FALSE,
-    filter = TRUE, ...)
+    filter = FALSE, ...)
 }
 \arguments{
   \item{counts}{Count matrix}
