@@ -34,7 +34,7 @@ few dependencies that cbcbSEQ uses:
 
 ```r
 source("http://bioconductor.org/biocLite.R")
-biocLite(c('limma', 'preprocessCore', 'sva'))
+biocLite(c('limma', 'preprocessCore', 'sva', 'pasilla'))
 ```
 
 Next, use [devtools](https://github.com/hadley/devtools) to install the latest
