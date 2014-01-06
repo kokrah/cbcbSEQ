@@ -131,8 +131,7 @@ We adjust data by removing the empirical bayesian estimates of batch location ef
 # combatMod function
 # noScale=TRUE option not to scale adjust
 tmp = combatMod(cpm, batch=design$libType, mod=design$condition, noScale=TRUE)
-names(tmp)
-tmp = tmp$bayesdata
+
 # look at PCA results again
 res = makeSVD(tmp)
 # batch effect is reduced
@@ -179,6 +178,8 @@ top1 = topTable(eb1, coef=2, n=nrow(v1$E))
 @
 Compare results:
 <<>>=
+top$ID = rownames(top)
+top1$ID = rownames(top1)
 tab = merge(top[,c("ID", "adj.P.Val")], top1[,c("ID", "adj.P.Val")], by="ID")
 as.data.frame(table(combat = tab[,2] < 0.05, model = tab[,3] < 0.05))
 @
