@@ -22,7 +22,7 @@ dim(counts)
 ###################################################
 ### code chunk number 3: cbcbSEQIntro.Rnw:78-84
 ###################################################
-design = data.frame(row.names=colnames(counts), 
+design = data.frame(row.names=colnames(counts),
                     condition=c("untreated","untreated","untreated",
                                 "untreated","treated","treated","treated"),
                     libType=c("single-end","single-end","paired-end",
@@ -56,24 +56,23 @@ pcRes(res$v,res$d, design$condition, design$libType)
 
 
 ###################################################
-### code chunk number 6: cbcbSEQIntro.Rnw:113-119
+### code chunk number 6: cbcbSEQIntro.Rnw:112-118
 ###################################################
-plotPC(res$v,res$d, 
+plotPC(res$v,res$d,
        col=design$condition, # color by batch
        pch=19, main="PCA plot",
        xlim=c(min(res$v[,1])-.08,max(res$v[,1])+.08),
 	     ylim=c(min(res$v[,2])-.08,max(res$v[,2])+.08))
-text(res$v[,1], res$v[,2], design$libType, pos=1, cex=0.6) 
+text(res$v[,1], res$v[,2], design$libType, pos=1, cex=0.6)
 
 
 ###################################################
-### code chunk number 7: cbcbSEQIntro.Rnw:130-139
+### code chunk number 7: cbcbSEQIntro.Rnw:129-137
 ###################################################
 # combatMod function
 # noScale=TRUE option not to scale adjust
 tmp = combatMod(cpm, batch=design$libType, mod=design$condition, noScale=TRUE)
-names(tmp)
-tmp = tmp$bayesdata
+
 # look at PCA results again
 res = makeSVD(tmp)
 # batch effect is reduced
@@ -81,33 +80,34 @@ pcRes(res$v,res$d, design$condition, design$libType)
 
 
 ###################################################
-### code chunk number 8: cbcbSEQIntro.Rnw:141-147
+### code chunk number 8: cbcbSEQIntro.Rnw:139-145
 ###################################################
-plotPC(res$v,res$d, 
+plotPC(res$v,res$d,
        col=design$condition, # color by batch
        pch=19, main="PCA plot",
        xlim=c(min(res$v[,1])-.08,max(res$v[,1])+.08),
        ylim=c(min(res$v[,2])-.08,max(res$v[,2])+.08))
-text(res$v[,1], res$v[,2], design$libType, pos=1, cex=0.6) 
+text(res$v[,1], res$v[,2], design$libType, pos=1, cex=0.6)
 
 
 ###################################################
-### code chunk number 9: cbcbSEQIntro.Rnw:151-152
+### code chunk number 9: cbcbSEQIntro.Rnw:149-151
 ###################################################
-v = voomMod(tmp, model.matrix(~design$condition), lib.size=libsize, plot=TRUE)
+v = voomMod(tmp, model.matrix(~design$condition), lib.size=libsize)
+v$plot
 
 
 ###################################################
-### code chunk number 10: cbcbSEQIntro.Rnw:155-159
+### code chunk number 10: cbcbSEQIntro.Rnw:154-158
 ###################################################
-v
+summary(v)
 fit = lmFit(v)
 eb = eBayes(fit)
 top = topTable(eb, coef=2, n=nrow(v$E))
 
 
 ###################################################
-### code chunk number 11: cbcbSEQIntro.Rnw:162-166
+### code chunk number 11: cbcbSEQIntro.Rnw:161-165
 ###################################################
 sel = top$adj.P.Val < 0.05
 plot(top$logFC, -log10(top$adj.P.Val), pch=16, cex=0.3,
@@ -116,21 +116,23 @@ abline(v=c(-1,1), h=-log10(0.05), col="blue")
 
 
 ###################################################
-### code chunk number 12: cbcbSEQIntro.Rnw:170-178
+### code chunk number 12: cbcbSEQIntro.Rnw:169-177
 ###################################################
 cond=design$condition
 batch=design$libType
 mod = model.matrix(~cond+batch ,
                    contrasts.arg=list(cond="contr.treatment", batch="contr.sum"))
-v1 = voom(counts, mod) 
+v1 = voom(counts, mod)
 fit1 = lmFit(v1)
 eb1 = eBayes(fit1)
 top1 = topTable(eb1, coef=2, n=nrow(v1$E))
 
 
 ###################################################
-### code chunk number 13: cbcbSEQIntro.Rnw:181-183
+### code chunk number 13: cbcbSEQIntro.Rnw:180-184
 ###################################################
+top$ID = rownames(top)
+top1$ID = rownames(top1)
 tab = merge(top[,c("ID", "adj.P.Val")], top1[,c("ID", "adj.P.Val")], by="ID")
 as.data.frame(table(combat = tab[,2] < 0.05, model = tab[,3] < 0.05))
 

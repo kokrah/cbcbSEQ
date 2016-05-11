@@ -54,7 +54,7 @@ The functions in this package can be grouped into two main categories:
 \end{enumerate}
 \Rcode{batchSEQ} is the pipeline function. It combines \Rcode{qNorm}, \Rcode{log2CPM}, \Rcode{voomMod}, and \Rcode{combatMod}
 into one step.\\\\
-Below we will illustrte how to use these functions using the pasilla data set.\\\\
+Below we will illustrate how to use these functions using the pasilla data set.\\\\
 {\bf note}: All the functions in this package have a detailed help file which tells you
 what kind of objects go in and what kind of objects come out. It is important to look
 at these help files for each function.
@@ -72,11 +72,11 @@ dim(counts)
 counts = counts[rowSums(counts) > ncol(counts),]
 dim(counts)
 @
-In this dataset there are two biological conditions: treated (3 samples) and untreated (4 samples). 
+In this dataset there are two biological conditions: treated (3 samples) and untreated (4 samples).
 Two samples are single-end and the other 4 are paired-end. We will use sigle-end and paired-end
 as illustration of batch effects. Below is the experiment design matrix (pheno data.frame).
 <<>>=
-design = data.frame(row.names=colnames(counts), 
+design = data.frame(row.names=colnames(counts),
                     condition=c("untreated","untreated","untreated",
                                 "untreated","treated","treated","treated"),
                     libType=c("single-end","single-end","paired-end",
@@ -108,22 +108,21 @@ We can now call pcRes and plotPC.
 <<>>=
 pcRes(res$v,res$d, design$condition, design$libType)
 @
-\item plotPC: Plot first 2 principal components. This function works like the regular plot function in R. ie. We can add all the options to make the plot sensible and well labelled. Below is an 
-example:
+\item plotPC: Plot first 2 principal components. This function works like the regular plot function in R. ie. We can add all the options to make the plot sensible and well labelled. Below is an example:
 <<fig=TRUE>>=
-plotPC(res$v,res$d, 
+plotPC(res$v,res$d,
        col=design$condition, # color by batch
        pch=19, main="PCA plot",
        xlim=c(min(res$v[,1])-.08,max(res$v[,1])+.08),
 	     ylim=c(min(res$v[,2])-.08,max(res$v[,2])+.08))
-text(res$v[,1], res$v[,2], design$libType, pos=1, cex=0.6) 
+text(res$v[,1], res$v[,2], design$libType, pos=1, cex=0.6)
 @
 \end{itemize}
 
 We see that there is a batch effect in the data. Both in the PCA "correlation" table
 and the PCA plot.
 \subsection{Correct data for batch effects}
-A standard way of accounting for batch effects in data analysis is to include batch indicators as covariates in a linear model (e.g., in \Rpackage{limma} with weights computed by \Rcode{voom} to model heteroskedasticity through a mean-variance relationship). However, in some cases we may want to obtain robust estimates of batch effects using a hierarchical model like ComBat~\cite{Johnson:2007fp}. However, we made some modifications to Combat. The most significant is that we do not estimate or adjust for batch scale effect due to heterskedasticity. In order to account for scaling
+A standard way of accounting for batch effects in data analysis is to include batch indicators as covariates in a linear model (e.g., in \Rpackage{limma} with weights computed by \Rcode{voom} to model heteroscedasticity through a mean-variance relationship). However, in some cases we may want to obtain robust estimates of batch effects using a hierarchical model like ComBat~\cite{Johnson:2007fp}. However, we made some modifications to Combat. The most significant is that we do not estimate or adjust for batch scale effect due to heterskedasticity. In order to account for scaling
 we have to take into account the mean var relationship inherent in this kind of data (we're working on it, but it's not done yet).
 We adjust data by removing the empirical bayesian estimates of batch location effects.
 
@@ -138,21 +137,22 @@ res = makeSVD(tmp)
 pcRes(res$v,res$d, design$condition, design$libType)
 @
 <<fig=TRUE>>=
-plotPC(res$v,res$d, 
+plotPC(res$v,res$d,
        col=design$condition, # color by batch
        pch=19, main="PCA plot",
        xlim=c(min(res$v[,1])-.08,max(res$v[,1])+.08),
        ylim=c(min(res$v[,2])-.08,max(res$v[,2])+.08))
-text(res$v[,1], res$v[,2], design$libType, pos=1, cex=0.6) 
+text(res$v[,1], res$v[,2], design$libType, pos=1, cex=0.6)
 @
 We are now ready to use \Rpackage{limma} and \Rcode{voom}. We also modified the \Rcode{voom} function so
-it takes data on log-scale as input. 
+it takes data on log-scale as input.
 <<fig=TRUE>>=
-v = voomMod(tmp, model.matrix(~design$condition), lib.size=libsize, plot=TRUE)
+v = voomMod(tmp, model.matrix(~design$condition), lib.size=libsize)
+v$plot
 @
 
 <<>>=
-v
+summary(v)
 fit = lmFit(v)
 eb = eBayes(fit)
 top = topTable(eb, coef=2, n=nrow(v$E))
@@ -171,7 +171,7 @@ cond=design$condition
 batch=design$libType
 mod = model.matrix(~cond+batch ,
                    contrasts.arg=list(cond="contr.treatment", batch="contr.sum"))
-v1 = voom(counts, mod) 
+v1 = voom(counts, mod)
 fit1 = lmFit(v1)
 eb1 = eBayes(fit1)
 top1 = topTable(eb1, coef=2, n=nrow(v1$E))

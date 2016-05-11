@@ -1,4 +1,5 @@
 Package: cbcbSEQ
+Type: Package
 Maintainer: Kwame Okrah <kwame.okrah@gmail.com>
 Author: Kwame Okrah, Hector Corrada Bravo
 Version: 0.9.1
@@ -14,8 +15,12 @@ Depends:
     sva,
 Suggests:
     pasilla,
+    survJamda
+Imports: ggplot2, methods, utils, graphics, stats
 Collate:
     'explore.R'
     'pipeline.R'
+    'cbcbSEQ.R'
     'transform.R'
     'filter.R'
+RoxygenNote: 5.0.1
