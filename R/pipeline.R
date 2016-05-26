@@ -1,11 +1,11 @@
 #' a pipeline for batch correction and mean-variance function calculation for count data
-#' 
+#'
 #' The pipeline includes
 #'  1) quantile normalization
 #'  2) log-transformation of counts
 #'  3) combat batch correction
 #'  4) voom calculation of weights for testing from mean-variance relationship
-#'  
+#'
 #' @param counts Count matrix
 #' @param design model.matrix for differential expression testing
 #' @param batch factor indicating batch
@@ -17,26 +17,25 @@
 #' @param ... pass arguments to internal functions
 #' @return list with components elist (result of calling voom) and combatEstimates (batch effect estimates from combat)
 #' @export
-batchSEQ <- function(counts, design, batch, condition, lib.size=NULL, verbose=FALSE, plot=FALSE, filter=FALSE, ...)
-{
-  if (filter) {
-    # filter samples
-    counts <- filterCounts(counts, lib.size, ...)
-  }
-  
-  # quantile normalize counts
-  qcounts = qNorm(counts, verbose=verbose)
-  
-  # convert to log(counts per million)
-  res = log2CPM(qcounts, lib.size=lib.size)
-  y = res$y
-  lib.size = res$lib.size
-  
-  # run combat on the log(cpm) data
-  res = combatMod(y, batch, condition, ...)
-   
-  # compute weights from voom
-  voomRes = voomMod(res, design, lib.size, plot=plot)
+batchSEQ <- function(counts, design, batch, condition, lib.size=NULL, verbose=FALSE, plot=FALSE, filter=FALSE, ...) {
+    if (filter) {
+        ## filter samples
+        counts <- filterCounts(counts, lib.size, ...)
+    }
 
-  return(voomRes)
+    ## quantile normalize counts
+    qcounts <- qNorm(counts, verbose=verbose)
+
+    ## convert to log(counts per million)
+    res <- log2CPM(qcounts, lib.size=lib.size)
+    y <- res$y
+    lib.size <- res$lib.size
+
+    ## run combat on the log(cpm) data
+    res <- combatMod(y, batch, condition, ...)
+
+    ## compute weights from voom
+    voomRes <- voomMod(res, design, lib.size, plot=plot)
+
+    return(voomRes)
 }

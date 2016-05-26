@@ -1,6 +1,6 @@
 #' Filter low expression genes, using independent filtering
 #' recommended in Nature Protocols paper
-#' 
+#'
 #' @param counts Count matrix
 #' @param lib.size library sizes, if missing or sum uses the total counts per samples
 #' @param thresh Minimum counts per million to determine expression
@@ -8,12 +8,11 @@
 #' @return Filtered count matrix
 #' @export
 filterCounts <- function(counts, lib.size = NULL,
-                         thresh = 1, 
-                         minSamples = 2)
-{
-  cpms <- 2^log2CPM(counts, lib.size=lib.size)$y
-  keep <- rowSums(cpms > thresh) >= minSamples
-  counts <- counts[keep,]
-  counts
+                         thresh = 1,
+                         minSamples = 2) {
+    cpms <- 2^log2CPM(counts, lib.size=lib.size)$y
+    keep <- rowSums(cpms > thresh) >= minSamples
+    counts <- counts[keep,]
+    return(counts)
 }
 
